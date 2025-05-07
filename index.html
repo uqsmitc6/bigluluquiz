@@ -1,0 +1,1028 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Big Lulu's Quiz</title>
+    <style>
+        :root {
+            --pastel-pink: #FFCAD4;
+            --pastel-yellow: #F9F9CC;
+            --pastel-green: #B0F2B4;
+            --pastel-blue: #BAE5FF;
+            --pastel-purple: #D9C4F8;
+            --pastel-peach: #FFE3DB;
+            --dark-text: #4A4A4A;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--pastel-blue);
+            color: var(--dark-text);
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 30px auto;
+            padding: 20px;
+            background-color: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: var(--pastel-purple);
+            border-radius: 15px;
+        }
+        
+        h1 {
+            font-size: 2.8em;
+            margin: 0;
+            color: var(--dark-text);
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        h2 {
+            font-size: 1.8em;
+            color: var(--dark-text);
+        }
+        
+        .welcome {
+            text-align: center;
+            padding: 30px;
+            background-color: var(--pastel-peach);
+            border-radius: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .welcome input, .welcome button {
+            font-size: 1.1em;
+            padding: 12px 20px;
+            margin: 10px 0;
+            border-radius: 10px;
+            border: none;
+        }
+        
+        .welcome input {
+            width: 60%;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .welcome button {
+            background-color: var(--pastel-green);
+            color: var(--dark-text);
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .welcome button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+        }
+        
+        .quiz-form {
+            padding: 20px;
+        }
+        
+        .quiz-section {
+            padding: 20px;
+            margin-bottom: 30px;
+            border-radius: 15px;
+        }
+        
+        .quiz-section:nth-child(4n+1) {
+            background-color: var(--pastel-pink);
+        }
+        
+        .quiz-section:nth-child(4n+2) {
+            background-color: var(--pastel-yellow);
+        }
+        
+        .quiz-section:nth-child(4n+3) {
+            background-color: var(--pastel-green);
+        }
+        
+        .quiz-section:nth-child(4n+4) {
+            background-color: var(--pastel-blue);
+        }
+        
+        .question {
+            font-weight: bold;
+            font-size: 1.2em;
+            margin-bottom: 10px;
+        }
+        
+        .answer-input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 20px;
+            border: none;
+            border-radius: 10px;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+            font-size: 1.1em;
+        }
+        
+        .submit-area {
+            text-align: center;
+            margin-top: 30px;
+            padding: 20px;
+            background-color: var(--pastel-purple);
+            border-radius: 15px;
+        }
+        
+        .submit-button {
+            padding: 15px 30px;
+            font-size: 1.2em;
+            background-color: var(--pastel-green);
+            color: var(--dark-text);
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .submit-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
+        }
+        
+        .thank-you {
+            text-align: center;
+            padding: 40px;
+            background-color: var(--pastel-green);
+            border-radius: 15px;
+        }
+        
+        .admin-section {
+            margin-top: 30px;
+            padding: 20px;
+            text-align: center;
+            border-top: 2px dashed var(--pastel-purple);
+        }
+        
+        .admin-password {
+            padding: 10px;
+            border-radius: 10px;
+            border: none;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .admin-button {
+            padding: 10px 20px;
+            background-color: var(--pastel-blue);
+            color: var(--dark-text);
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            margin-left: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .participant-card {
+            background-color: white;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .participant-score {
+            background-color: var(--pastel-green);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+        }
+        
+        .admin-dashboard h2 {
+            background-color: var(--pastel-purple);
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 30px;
+        }
+        
+        .results-container {
+            margin-top: 30px;
+        }
+        
+        .result-item {
+            background-color: white;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+        
+        .result-question {
+            font-weight: bold;
+            padding: 10px;
+            background-color: var(--pastel-yellow);
+            border-radius: 8px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .correct-answer {
+            background-color: var(--pastel-green);
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 0.9em;
+        }
+        
+        .result-answers {
+            padding-left: 20px;
+        }
+        
+        .result-answer {
+            padding: 8px;
+            margin-bottom: 8px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .result-participant {
+            font-weight: bold;
+            color: var(--dark-text);
+        }
+        
+        .correct {
+            color: green;
+            font-weight: bold;
+        }
+        
+        .incorrect {
+            color: #ff6666;
+        }
+        
+        .score-badge {
+            background-color: var(--pastel-blue);
+            padding: 5px 10px;
+            border-radius: 5px;
+            margin-left: 10px;
+        }
+        
+        .progress-bar-container {
+            width: 100%;
+            background-color: #f1f1f1;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+        
+        .progress-bar {
+            height: 20px;
+            border-radius: 10px;
+            text-align: center;
+            line-height: 20px;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .score-card {
+            background-color: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        
+        .score-number {
+            font-size: 3em;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        
+        .leaderboard {
+            background-color: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin-top: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .leaderboard-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .leaderboard-rank {
+            font-weight: bold;
+            width: 30px;
+        }
+        
+        .export-button {
+            padding: 12px 25px;
+            background-color: var(--pastel-green);
+            color: var(--dark-text);
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            margin: 20px 0;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .exit-button {
+            padding: 12px 25px;
+            background-color: var(--pastel-pink);
+            color: var(--dark-text);
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            margin: 20px 0;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            padding: 20px;
+        }
+        
+        .spinner {
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid var(--pastel-purple);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin-bottom: 15px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                padding: 15px;
+            }
+            
+            .welcome input {
+                width: 100%;
+            }
+        }
+        
+        .sheet-link {
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .sheet-link a {
+            background-color: var(--pastel-blue);
+            color: var(--dark-text);
+            padding: 10px 15px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+            display: inline-block;
+        }
+        
+        .sheet-link a:hover {
+            background-color: var(--pastel-green);
+        }
+        
+        .notification {
+            padding: 15px;
+            background-color: var(--pastel-green);
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: bold;
+            display: none;
+        }
+        
+        .error {
+            background-color: var(--pastel-pink);
+        }
+    </style>
+</head>
+<body>
+    <div id="notification" class="notification"></div>
+    <div class="container" id="app-container">
+        <!-- Content will be dynamically inserted here -->
+    </div>
+
+    <script>
+        // Configuration
+        // Your Google Apps Script Web App URL
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzeEddiyYCWMmvOUFfXq5-2rJos-q7Z8ZcC6pESLCYyDMqNAcKM9yF3RuR-FrhFGn0QrQ/exec';
+        const SHEET_URL = 'https://docs.google.com/spreadsheets/d/1gmxqiCXWpbMU78R09pJQfHVxdfAmM2jdqJ398BMiH54/edit';
+        
+        // State management
+        const state = {
+            username: localStorage.getItem('triviaUsername') || '',
+            quizStarted: false,
+            answers: JSON.parse(localStorage.getItem('triviaAnswers') || '{}'),
+            submitted: localStorage.getItem('triviaSubmitted') === 'true',
+            isAdmin: false,
+            adminPassword: '',
+            userScore: JSON.parse(localStorage.getItem('triviaUserScore') || '0'),
+            scoreRevealed: localStorage.getItem('triviaScoreRevealed') === 'true',
+            isLoading: false,
+            responseData: null
+        };
+
+        // Quiz questions array - exactly as provided
+        const questions = [
+            "What's the type of crossword where each clue is a word puzzle?",
+            "What Australian brands name is an abbreviation for \"Loose kid\"?",
+            "What are the two cities targeted by the atomic bombs?",
+            "Beginning with E what is the name for atopic dermatitis?",
+            "Name the two spice girls who left the group at separate times?",
+            "Are these names of Melbourne cup horses or drag race Queens? A) What a Nuisance B) Onya Nurve C) Aquaria D) Lady Camden",
+            "Beginning with C what's the dish which consists of fish or shellfish and is marinated in citrus?",
+            "3 pieces of gym equipment all ending in \"bell\"",
+            "What breed was the dog Valerie who had escaped her owners for 529 days on Kangaroo Island?",
+            "The following share their name with a type of snake- name them/the snake. A) camping store B) thin scarf C) Dodge car D) Cairns Basketball team",
+            "4 Olympic sports which have field goalies?",
+            "What creature do the flags of Wales, Butan and Malta all share?",
+            "What was the Greek mythological character that flew too close to the sun?",
+            "On Australia what does ASIC stand for?",
+            "Beginning with C what is the name for the ongoing adventures in Dungeons and Dragons?",
+            "What shape themed idiom was voted most hated office placed jargon?",
+            "In Australian slang what device is known as a \"Winnie Bluetooth\"?",
+            "What two film franchises released in the 80s involves time travel in order to get parents back together to ensure the time traveler can be born?",
+            "What is 6/25 as a percentage?",
+            "Come back to this. (If you know the answer, enter it)",
+            "What watch brand has a crown as the logo?",
+            "Fascist dictator of Italy from 1922-1943?",
+            "3 main ingredients used to make gelato? (Not eggs!)",
+            "What terms is derived from an ancient Middle East region which refers to someone who helps strangers?",
+            "What four letters represent the button controls on a switch controller?",
+            "Which is the bigger court size- tennis doubles or netball?",
+            "Discovered in 1905 what is the most famous mathematics equation?",
+            "In Microsoft word what do these commands do: A) Control F B) Control W C) Control U D) Control E",
+            "What two Australian states do not have daylight savings?",
+            "What word refers to a seal used officially to give personal authority to a document in lieu of signature?",
+            "This was an audio question. (If you know what this refers to, please answer)",
+            "What two elements on the periodic table are names derived from planets and not from gods?",
+            "Two singers beginning with F who have released songs titled \"big girls don't cry\"",
+            "What magical place can be found by going \"second to the right, and straight on till morning\"?",
+            "What does Bob Ross call mistakes in painting?",
+            "In reference to the beer, What does VB stand for?",
+            "In reference to programming language, what does VB stand for?",
+            "What two male Disney/Pixar character names are also types of fish?",
+            "What cosmetics company acquired Aesop in 2023?",
+            "What word means both a part of a car and a small handbag?",
+            "What's the name of an inline skate brand that also references a utensil used on pizza?",
+            "Tie breaker: what's the area of a squash court?"
+        ];
+
+        // Correct answers for automatic scoring
+        const correctAnswers = [
+            "cryptic", // What's the type of crossword where each clue is a word puzzle?
+            "lskd", // What Australian brands name is an abbreviation for "Loose kid"?
+            "hiroshima and nagasaki", // What are the two cities targeted by the atomic bombs?
+            "eczema", // Beginning with E what is the name for atopic dermatitis?
+            "geri halliwell and victoria beckham", // Name the two spice girls who left the group at separate times?
+            "a is melbourne cup horse, b, c & d are drag race queens", // Are these names of Melbourne cup horses or drag race Queens?
+            "ceviche", // Beginning with C what's the dish which consists of fish or shellfish and is marinated in citrus?
+            "dumbbell, kettlebell, barbell", // 3 pieces of gym equipment all ending in "bell"
+            "kelpie", // What breed was the dog Valerie who had escaped her owners for 529 days on Kangaroo Island?
+            "anaconda, boa, viper, taipan", // The following share their name with a type of snake
+            "hockey, water polo, handball, lacrosse", // 4 Olympic sports which have field goalies?
+            "dragon", // What creature do the flags of Wales, Butan and Malta all share?
+            "icarus", // What was the Greek mythological character that flew too close to the sun?
+            "australian securities and investments commission", // On Australia what does ASIC stand for?
+            "campaign", // Beginning with C what is the name for the ongoing adventures in Dungeons and Dragons?
+            "thinking outside the box", // What shape themed idiom was voted most hated office placed jargon?
+            "winnie bluetooth", // In Australian slang what device is known as a "Winnie Bluetooth"?
+            "back to the future and star trek iv", // What two film franchises released in the 80s involves time travel
+            "24%", // What is 6/25 as a percentage?
+            "", // Come back to this
+            "rolex", // What watch brand has a crown as the logo?
+            "benito mussolini", // Fascist dictator of Italy from 1922-1943?
+            "milk, cream, sugar", // 3 main ingredients used to make gelato? (Not eggs!)
+            "samaritan", // What terms is derived from an ancient Middle East region which refers to someone who helps strangers?
+            "abxy", // What four letters represent the button controls on a switch controller?
+            "netball", // Which is the bigger court size- tennis doubles or netball?
+            "e=mc²", // Discovered in 1905 what is the most famous mathematics equation?
+            "find, close, underline, center", // In Microsoft word what do these commands do
+            "queensland and western australia", // What two Australian states do not have daylight savings?
+            "signet", // What word refers to a seal used officially to give personal authority to a document in lieu of signature?
+            "", // This was an audio question
+            "mercury and uranium", // What two elements on the periodic table are names derived from planets and not from gods?
+            "frankie valli and fergie", // Two singers beginning with F who have released songs titled "big girls don't cry"
+            "neverland", // What magical place can be found by going "second to the right, and straight on till morning"?
+            "happy accidents", // What does Bob Ross call mistakes in painting?
+            "victoria bitter", // In reference to the beer, What does VB stand for?
+            "visual basic", // In reference to programming language, what does VB stand for?
+            "marlin and nemo", // What two male Disney/Pixar character names are also types of fish?
+            "l'oreal", // What cosmetics company acquired Aesop in 2023?
+            "clutch", // What word means both a part of a car and a small handbag?
+            "rollerblade", // What's the name of an inline skate brand that also references a utensil used on pizza?
+            "62.4 square meters" // Tie breaker: what's the area of a squash court?
+        ];
+
+        // Correct admin password
+        const correctAdminPassword = 'triviaMaster';
+
+        // Helper function to calculate score
+        function calculateScore(userAnswers) {
+            let score = 0;
+            let correctCount = 0;
+            
+            // Skip question 19 (index 19) which is "Come back to this"
+            // Skip question 31 (index 30) which is "This was an audio question"
+            const questionsToSkip = [19, 30];
+            
+            Object.keys(userAnswers).forEach(questionIndex => {
+                // Skip specific questions
+                if (questionsToSkip.includes(parseInt(questionIndex))) {
+                    return;
+                }
+                
+                const userAnswer = userAnswers[questionIndex].toLowerCase().trim();
+                const correctAnswer = correctAnswers[questionIndex].toLowerCase();
+                
+                // Check if the user's answer includes the correct answer
+                // This is a simple check - more sophisticated matching could be implemented
+                if (userAnswer.includes(correctAnswer) || correctAnswer.includes(userAnswer)) {
+                    correctCount++;
+                }
+            });
+            
+            // Calculate percentage score (excluding skipped questions)
+            score = Math.round((correctCount / (questions.length - questionsToSkip.length)) * 100);
+            
+            return {
+                score: score,
+                correctCount: correctCount,
+                totalQuestions: questions.length - questionsToSkip.length
+            };
+        }
+
+        // Function to check if an answer is correct
+        function isAnswerCorrect(userAnswer, correctAnswer) {
+            if (!userAnswer) return false;
+            
+            userAnswer = userAnswer.toLowerCase().trim();
+            correctAnswer = correctAnswer.toLowerCase();
+            
+            return userAnswer.includes(correctAnswer) || correctAnswer.includes(userAnswer);
+        }
+
+        // Function to show notification
+        function showNotification(message, isError = false) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.style.display = 'block';
+            
+            if (isError) {
+                notification.classList.add('error');
+            } else {
+                notification.classList.remove('error');
+            }
+            
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 5000);
+        }
+
+        // Function to send data to Google Sheets
+        async function sendToGoogleSheets(data) {
+            state.isLoading = true;
+            render();
+            
+            try {
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                
+                if (result.result === 'success') {
+                    showNotification('Data saved successfully!');
+                    return true;
+                } else {
+                    showNotification('Error: ' + result.message, true);
+                    console.error('Error:', result.message);
+                    return false;
+                }
+            } catch (error) {
+                showNotification('Error connecting to Google Sheets. Your answers are saved locally.', true);
+                console.error('Error:', error);
+                return false;
+            } finally {
+                state.isLoading = false;
+                render();
+            }
+        }
+
+        // Function to fetch data from Google Sheets
+        async function fetchFromGoogleSheets() {
+            state.isLoading = true;
+            render();
+            
+            try {
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        type: 'getResponses'
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.result === 'success') {
+                    state.responseData = result;
+                    return true;
+                } else {
+                    showNotification('Error fetching data: ' + result.message, true);
+                    console.error('Error:', result.message);
+                    return false;
+                }
+            } catch (error) {
+                showNotification('Error connecting to Google Sheets.', true);
+                console.error('Error:', error);
+                return false;
+            } finally {
+                state.isLoading = false;
+                render();
+            }
+        }
+
+        // Render functions
+        function renderWelcomeScreen() {
+            const appDiv = document.getElementById('app-container');
+            appDiv.innerHTML = `
+                <header>
+                    <h1>🍺 Big Lulu's Quiz ✓</h1>
+                </header>
+                
+                <div class="welcome">
+                    <h2>Welcome to the Family Trivia Quiz!</h2>
+                    <p>Enter your name to begin. Your answers will be submitted to a shared spreadsheet for the quiz master.</p>
+                    
+                    <div>
+                        <input 
+                            type="text" 
+                            id="username-input" 
+                            value="${state.username}" 
+                            placeholder="Your Name" 
+                        />
+                        <button id="start-quiz-btn">Start Quiz</button>
+                    </div>
+                    
+                    <div class="admin-section">
+                        <p>Quiz Master? Enter password to see results</p>
+                        <input
+                            type="password"
+                            id="admin-password"
+                            placeholder="Admin Password"
+                            class="admin-password"
+                        />
+                        <button id="admin-login-btn" class="admin-button">Login</button>
+                    </div>
+                </div>
+            `;
+
+            // Add event listeners
+            document.getElementById('username-input').addEventListener('input', (e) => {
+                state.username = e.target.value;
+                localStorage.setItem('triviaUsername', state.username);
+            });
+
+            document.getElementById('start-quiz-btn').addEventListener('click', () => {
+                if (state.username.trim() === '') {
+                    alert('Please enter your name to start the quiz');
+                    return;
+                }
+                state.quizStarted = true;
+                render();
+            });
+
+            document.getElementById('admin-password').addEventListener('input', (e) => {
+                state.adminPassword = e.target.value;
+            });
+
+            document.getElementById('admin-login-btn').addEventListener('click', () => {
+                if (state.adminPassword === correctAdminPassword) {
+                    state.isAdmin = true;
+                    fetchFromGoogleSheets();
+                    render();
+                } else {
+                    alert('Incorrect password');
+                }
+            });
+        }
+
+        function renderQuizScreen() {
+            const appDiv = document.getElementById('app-container');
+            
+            let questionsHTML = '';
+            for (let i = 0; i < questions.length; i++) {
+                questionsHTML += `
+                    <div class="quiz-section">
+                        <div class="question">Q${i + 1}: ${questions[i]}</div>
+                        <textarea 
+                            class="answer-input" 
+                            id="answer-${i}" 
+                            placeholder="Your answer..."
+                            rows="3"
+                        >${state.answers[i] || ''}</textarea>
+                    </div>
+                `;
+            }
+            
+            appDiv.innerHTML = `
+                <header>
+                    <h1>🍺 Big Lulu's Quiz ✓</h1>
+                </header>
+                
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 0 20px;">
+                    <h2>Answer All Questions</h2>
+                    <p>Hi, ${state.username}! 👋</p>
+                </div>
+                
+                <form class="quiz-form" id="quiz-form">
+                    ${questionsHTML}
+                    
+                    <div class="submit-area">
+                        <p>Ready to submit your answers? Your answers will be saved to the quiz spreadsheet.</p>
+                        <button type="button" id="submit-btn" class="submit-button">Submit My Answers</button>
+                    </div>
+                </form>
+            `;
+
+            // Add event listeners for all textareas
+            for (let i = 0; i < questions.length; i++) {
+                document.getElementById(`answer-${i}`).addEventListener('input', (e) => {
+                    state.answers[i] = e.target.value;
+                    localStorage.setItem('triviaAnswers', JSON.stringify(state.answers));
+                });
+            }
+
+            // Submit button event listener
+            document.getElementById('submit-btn').addEventListener('click', async () => {
+                if (Object.keys(state.answers).length === 0) {
+                    alert('Please answer at least one question before submitting');
+                    return;
+                }
+                
+                // Calculate score
+                const scoreData = calculateScore(state.answers);
+                state.userScore = scoreData;
+                localStorage.setItem('triviaUserScore', JSON.stringify(scoreData));
+                
+                // Send to Google Sheets
+                const submissionData = {
+                    type: 'submission',
+                    username: state.username,
+                    answers: state.answers,
+                    correctAnswers: correctAnswers,
+                    questions: questions,
+                    score: scoreData
+                };
+                
+                const success = await sendToGoogleSheets(submissionData);
+                
+                // Even if Google Sheets submission fails, we still store locally
+                state.submitted = true;
+                localStorage.setItem('triviaSubmitted', 'true');
+                
+                // Show score
+                state.scoreRevealed = true;
+                localStorage.setItem('triviaScoreRevealed', 'true');
+                
+                render();
+            });
+        }
+
+        function renderSubmittedScreen() {
+            const appDiv = document.getElementById('app-container');
+            
+            // Get score data
+            const scoreData = state.userScore;
+            
+            appDiv.innerHTML = `
+                <header>
+                    <h1>🎮 Big Lulu's Quiz 🎮</h1>
+                </header>
+                
+                <div class="thank-you">
+                    <h2>Thanks for playing, ${state.username}!</h2>
+                    <p>Your answers have been submitted and scored!</p>
+                    
+                    <div class="score-card">
+                        <h3>Your Score</h3>
+                        <div class="score-number">${scoreData.score}%</div>
+                        <p>You got ${scoreData.correctCount} out of ${scoreData.totalQuestions} questions correct!</p>
+                        
+                        <div class="progress-bar-container">
+                            <div class="progress-bar" style="width: ${scoreData.score}%; background-color: ${
+                                scoreData.score >= 90 ? '#4CAF50' : 
+                                scoreData.score >= 70 ? '#8BC34A' : 
+                                scoreData.score >= 50 ? '#FFEB3B' : 
+                                scoreData.score >= 30 ? '#FF9800' : '#F44336'
+                            };">
+                                ${scoreData.score}%
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <p>Check with the quiz master to see how you compared to other participants!</p>
+                    
+                    <button id="reset-btn" class="submit-button" style="margin-top: 30px;">Start Again (New User)</button>
+                </div>
+            `;
+
+            // Add event listeners
+            document.getElementById('reset-btn').addEventListener('click', () => {
+                state.username = '';
+                state.answers = {};
+                state.submitted = false;
+                state.quizStarted = false;
+                state.userScore = 0;
+                state.scoreRevealed = false;
+                
+                localStorage.removeItem('triviaUsername');
+                localStorage.removeItem('triviaAnswers');
+                localStorage.setItem('triviaSubmitted', 'false');
+                localStorage.removeItem('triviaUserScore');
+                localStorage.setItem('triviaScoreRevealed', 'false');
+                
+                render();
+            });
+        }
+
+        function renderLoadingScreen() {
+            const appDiv = document.getElementById('app-container');
+            appDiv.innerHTML = `
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Loading...</p>
+                </div>
+            `;
+        }
+
+        function renderAdminScreen() {
+            if (state.isLoading) {
+                renderLoadingScreen();
+                return;
+            }
+            
+            const appDiv = document.getElementById('app-container');
+            
+            // Process the leaderboard data if we have it from the API
+            let leaderboardHTML = '';
+            let participantsData = [];
+            
+            if (state.responseData && state.responseData.leaderboard) {
+                state.responseData.leaderboard.forEach((entry, index) => {
+                    participantsData.push({
+                        name: entry['Participant'],
+                        score: entry['Score'] || '0%',
+                        questionsAttempted: entry['Questions Attempted'] || 0,
+                        questionsCorrect: entry['Questions Correct'] || 0
+                    });
+                });
+                
+                // Generate leaderboard HTML
+                leaderboardHTML = participantsData.map((participant, index) => `
+                    <div class="participant-card">
+                        <span class="result-participant">${index + 1}. ${participant.name}</span>
+                        <span class="participant-score">${participant.score}</span>
+                    </div>
+                `).join('');
+            } else {
+                leaderboardHTML = '<p class="text-center">No participants data available. Try refreshing.</p>';
+            }
+            
+            // Process the response data for questions and answers
+            let resultsHTML = '';
+            
+            if (state.responseData && state.responseData.responses) {
+                // Group responses by question
+                const questionResponses = {};
+                
+                state.responseData.responses.forEach(response => {
+                    const questionNumber = response['Question Number'];
+                    if (!questionResponses[questionNumber]) {
+                        questionResponses[questionNumber] = {
+                            question: response['Question'],
+                            correctAnswer: response['Correct Answer'],
+                            answers: []
+                        };
+                    }
+                    
+                    questionResponses[questionNumber].answers.push({
+                        participant: response['Participant'],
+                        answer: response['Answer'],
+                        isCorrect: response['Is Correct'] === 'Yes'
+                    });
+                });
+                
+                // Generate results HTML
+                resultsHTML = Object.keys(questionResponses).map(questionNumber => {
+                    const questionData = questionResponses[questionNumber];
+                    
+                    // Generate answers HTML
+                    const answersHTML = questionData.answers.map(answer => `
+                        <div class="result-answer">
+                            <span class="result-participant">${answer.participant}:</span> 
+                            <span class="${answer.isCorrect ? 'correct' : 'incorrect'}">${answer.answer}</span>
+                        </div>
+                    `).join('');
+                    
+                    return `
+                        <div class="result-item">
+                            <div class="result-question">
+                                <span>${questionNumber}: ${questionData.question}</span>
+                                <span class="correct-answer">Answer: ${questionData.correctAnswer}</span>
+                            </div>
+                            <div class="result-answers">
+                                ${answersHTML}
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            } else {
+                resultsHTML = '<p class="text-center">No responses available. Try refreshing.</p>';
+            }
+            
+            appDiv.innerHTML = `
+                <header>
+                    <h1>🎮 Big Lulu's Quiz Results 🎮</h1>
+                </header>
+                
+                <div class="admin-dashboard">
+                    <div class="sheet-link">
+                        <a href="${SHEET_URL}" target="_blank">Open Quiz Spreadsheet</a>
+                        <button id="refresh-btn" class="admin-button">Refresh Data</button>
+                    </div>
+                    
+                    <h2>Leaderboard</h2>
+                    <div class="participants-container">
+                        ${leaderboardHTML}
+                    </div>
+                    
+                    <div class="results-container">
+                        <h2>Question Results</h2>
+                        ${resultsHTML}
+                    </div>
+                    
+                    <div style="text-align: center; margin-top: 20px;">
+                        <button id="exit-admin-btn" class="exit-button">Exit Admin Mode</button>
+                    </div>
+                </div>
+            `;
+
+            // Add event listeners
+            document.getElementById('exit-admin-btn').addEventListener('click', () => {
+                state.isAdmin = false;
+                state.adminPassword = '';
+                render();
+            });
+            
+            document.getElementById('refresh-btn').addEventListener('click', () => {
+                fetchFromGoogleSheets();
+            });
+        }
+
+        // Main render function
+        function render() {
+            if (state.isLoading) {
+                renderLoadingScreen();
+                return;
+            }
+            
+            if (state.isAdmin) {
+                renderAdminScreen();
+            } else if (!state.quizStarted) {
+                renderWelcomeScreen();
+            } else if (state.submitted) {
+                renderSubmittedScreen();
+            } else {
+                renderQuizScreen();
+            }
+        }
+
+        // Initial render
+        render();
+    </script>
+</body>
+</html>
