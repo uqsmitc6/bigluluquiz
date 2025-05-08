@@ -163,31 +163,6 @@
             border-radius: 15px;
         }
         
-        .admin-section {
-            margin-top: 30px;
-            padding: 20px;
-            text-align: center;
-            border-top: 2px dashed var(--pastel-purple);
-        }
-        
-        .admin-password {
-            padding: 10px;
-            border-radius: 10px;
-            border: none;
-            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-        
-        .admin-button {
-            padding: 10px 20px;
-            background-color: var(--pastel-blue);
-            color: var(--dark-text);
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            margin-left: 10px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-        
         .participant-card {
             background-color: white;
             padding: 15px;
@@ -204,13 +179,6 @@
             padding: 8px 15px;
             border-radius: 20px;
             font-weight: bold;
-        }
-        
-        .admin-dashboard h2 {
-            background-color: var(--pastel-purple);
-            padding: 15px;
-            border-radius: 10px;
-            margin-top: 30px;
         }
         
         .results-container {
@@ -373,17 +341,6 @@
             100% { transform: rotate(360deg); }
         }
         
-        @media (max-width: 768px) {
-            .container {
-                margin: 10px;
-                padding: 15px;
-            }
-            
-            .welcome input {
-                width: 100%;
-            }
-        }
-        
         .sheet-link {
             text-align: center;
             margin: 20px 0;
@@ -416,6 +373,55 @@
         .error {
             background-color: var(--pastel-pink);
         }
+        
+        .tab-container {
+            display: flex;
+            margin-bottom: 20px;
+        }
+        
+        .tab-button {
+            flex: 1;
+            padding: 15px;
+            font-size: 1.1em;
+            background-color: var(--pastel-blue);
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        
+        .tab-button:first-child {
+            border-top-left-radius: 10px;
+            border-bottom-left-radius: 10px;
+        }
+        
+        .tab-button:last-child {
+            border-top-right-radius: 10px;
+            border-bottom-right-radius: 10px;
+        }
+        
+        .tab-button.active {
+            background-color: var(--pastel-purple);
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                padding: 15px;
+            }
+            
+            .welcome input {
+                width: 100%;
+            }
+        }
     </style>
 </head>
 <body>
@@ -436,12 +442,11 @@
             quizStarted: false,
             answers: JSON.parse(localStorage.getItem('triviaAnswers') || '{}'),
             submitted: localStorage.getItem('triviaSubmitted') === 'true',
-            isAdmin: false,
-            adminPassword: '',
             userScore: JSON.parse(localStorage.getItem('triviaUserScore') || '0'),
             scoreRevealed: localStorage.getItem('triviaScoreRevealed') === 'true',
             isLoading: false,
-            responseData: null
+            responseData: null,
+            activeTab: 'score' // Default active tab for results page
         };
 
         // Quiz questions array - exactly as provided
@@ -536,9 +541,6 @@
             "62.4 square meters" // Tie breaker: what's the area of a squash court?
         ];
 
-        // Correct admin password
-        const correctAdminPassword = 'triviaMaster';
-
         // Helper function to calculate score
         function calculateScore(userAnswers) {
             let score = 0;
@@ -576,11 +578,19 @@
 
         // Function to check if an answer is correct
         function isAnswerCorrect(userAnswer, correctAnswer) {
-            if (!userAnswer) return false;
+            if (!userAnswer || !correctAnswer) return false;
             
             userAnswer = userAnswer.toLowerCase().trim();
-            correctAnswer = correctAnswer.toLowerCase();
+            correctAnswer = correctAnswer.toLowerCase().trim();
             
+            // More strict matching - single letters or very short answers won't match
+            // unless they're exact matches
+            if (userAnswer.length <= 2) {
+                return userAnswer === correctAnswer;
+            }
+            
+            // For longer answers, check if user answer contains the correct one or vice versa
+            // but with a minimum threshold of characters
             return userAnswer.includes(correctAnswer) || correctAnswer.includes(userAnswer);
         }
 
@@ -675,7 +685,7 @@
                 
                 <div class="welcome">
                     <h2>Welcome to the Family Trivia Quiz!</h2>
-                    <p>Enter your name to begin. Your answers will be submitted to a shared spreadsheet for the quiz master.</p>
+                    <p>Enter your name to begin. Your answers will be submitted to a shared spreadsheet for scoring.</p>
                     
                     <div>
                         <input 
@@ -685,17 +695,6 @@
                             placeholder="Your Name" 
                         />
                         <button id="start-quiz-btn">Start Quiz</button>
-                    </div>
-                    
-                    <div class="admin-section">
-                        <p>Quiz Master? Enter password to see results</p>
-                        <input
-                            type="password"
-                            id="admin-password"
-                            placeholder="Admin Password"
-                            class="admin-password"
-                        />
-                        <button id="admin-login-btn" class="admin-button">Login</button>
                     </div>
                 </div>
             `;
@@ -713,20 +712,6 @@
                 }
                 state.quizStarted = true;
                 render();
-            });
-
-            document.getElementById('admin-password').addEventListener('input', (e) => {
-                state.adminPassword = e.target.value;
-            });
-
-            document.getElementById('admin-login-btn').addEventListener('click', () => {
-                if (state.adminPassword === correctAdminPassword) {
-                    state.isAdmin = true;
-                    fetchFromGoogleSheets();
-                    render();
-                } else {
-                    alert('Incorrect password');
-                }
             });
         }
 
@@ -808,97 +793,38 @@
                 state.scoreRevealed = true;
                 localStorage.setItem('triviaScoreRevealed', 'true');
                 
+                // Fetch results data immediately after submission
+                await fetchFromGoogleSheets();
+                
                 render();
             });
         }
 
-        function renderSubmittedScreen() {
+        function renderResultsScreen() {
             const appDiv = document.getElementById('app-container');
             
             // Get score data
             const scoreData = state.userScore;
             
-            appDiv.innerHTML = `
-                <header>
-                    <h1>🎮 Big Lulu's Quiz 🎮</h1>
-                </header>
-                
-                <div class="thank-you">
-                    <h2>Thanks for playing, ${state.username}!</h2>
-                    <p>Your answers have been submitted and scored!</p>
-                    
-                    <div class="score-card">
-                        <h3>Your Score</h3>
-                        <div class="score-number">${scoreData.score}%</div>
-                        <p>You got ${scoreData.correctCount} out of ${scoreData.totalQuestions} questions correct!</p>
-                        
-                        <div class="progress-bar-container">
-                            <div class="progress-bar" style="width: ${scoreData.score}%; background-color: ${
-                                scoreData.score >= 90 ? '#4CAF50' : 
-                                scoreData.score >= 70 ? '#8BC34A' : 
-                                scoreData.score >= 50 ? '#FFEB3B' : 
-                                scoreData.score >= 30 ? '#FF9800' : '#F44336'
-                            };">
-                                ${scoreData.score}%
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <p>Check with the quiz master to see how you compared to other participants!</p>
-                    
-                    <button id="reset-btn" class="submit-button" style="margin-top: 30px;">Start Again (New User)</button>
-                </div>
-            `;
-
-            // Add event listeners
-            document.getElementById('reset-btn').addEventListener('click', () => {
-                state.username = '';
-                state.answers = {};
-                state.submitted = false;
-                state.quizStarted = false;
-                state.userScore = 0;
-                state.scoreRevealed = false;
-                
-                localStorage.removeItem('triviaUsername');
-                localStorage.removeItem('triviaAnswers');
-                localStorage.setItem('triviaSubmitted', 'false');
-                localStorage.removeItem('triviaUserScore');
-                localStorage.setItem('triviaScoreRevealed', 'false');
-                
-                render();
-            });
-        }
-
-        function renderLoadingScreen() {
-            const appDiv = document.getElementById('app-container');
-            appDiv.innerHTML = `
-                <div class="loading">
-                    <div class="spinner"></div>
-                    <p>Loading...</p>
-                </div>
-            `;
-        }
-
-        function renderAdminScreen() {
-            if (state.isLoading) {
-                renderLoadingScreen();
-                return;
-            }
-            
-            const appDiv = document.getElementById('app-container');
-            
-            // Process the leaderboard data if we have it from the API
+            // Process the leaderboard data
             let leaderboardHTML = '';
             let participantsData = [];
             
             if (state.responseData && state.responseData.leaderboard) {
-                state.responseData.leaderboard.forEach((entry, index) => {
+                state.responseData.leaderboard.forEach((entry) => {
                     participantsData.push({
                         name: entry['Participant'],
                         score: entry['Score'] || '0%',
                         questionsAttempted: entry['Questions Attempted'] || 0,
                         questionsCorrect: entry['Questions Correct'] || 0
                     });
+                });
+                
+                // Sort by score (descending)
+                participantsData.sort((a, b) => {
+                    const scoreA = parseInt(a.score);
+                    const scoreB = parseInt(b.score);
+                    return scoreB - scoreA;
                 });
                 
                 // Generate leaderboard HTML
@@ -909,7 +835,7 @@
                     </div>
                 `).join('');
             } else {
-                leaderboardHTML = '<p class="text-center">No participants data available. Try refreshing.</p>';
+                leaderboardHTML = '<p class="text-center">No other participants data available yet.</p>';
             }
             
             // Process the response data for questions and answers
@@ -961,46 +887,126 @@
                     `;
                 }).join('');
             } else {
-                resultsHTML = '<p class="text-center">No responses available. Try refreshing.</p>';
+                resultsHTML = '<p class="text-center">No other responses available yet.</p>';
             }
             
             appDiv.innerHTML = `
                 <header>
-                    <h1>🎮 Big Lulu's Quiz Results 🎮</h1>
+                    <h1>🍺 Big Lulu's Quiz Results 🍺</h1>
                 </header>
                 
-                <div class="admin-dashboard">
+                <div class="thank-you">
+                    <h2>Thanks for playing, ${state.username}!</h2>
+                    <p>Your answers have been submitted and scored!</p>
+                    
+                    <div class="score-card">
+                        <h3>Your Score</h3>
+                        <div class="score-number">${scoreData.score}%</div>
+                        <p>You got ${scoreData.correctCount} out of ${scoreData.totalQuestions} questions correct!</p>
+                        
+                        <div class="progress-bar-container">
+                            <div class="progress-bar" style="width: ${scoreData.score}%; background-color: ${
+                                scoreData.score >= 90 ? '#4CAF50' : 
+                                scoreData.score >= 70 ? '#8BC34A' : 
+                                scoreData.score >= 50 ? '#FFEB3B' : 
+                                scoreData.score >= 30 ? '#FF9800' : '#F44336'
+                            };">
+                                ${scoreData.score}%
+                            </div>
+                        </div>
+                    </div>
+                    
                     <div class="sheet-link">
-                        <a href="${SHEET_URL}" target="_blank">Open Quiz Spreadsheet</a>
-                        <button id="refresh-btn" class="admin-button">Refresh Data</button>
+                        <button id="refresh-btn" class="admin-button">Refresh Results Data</button>
                     </div>
                     
-                    <h2>Leaderboard</h2>
-                    <div class="participants-container">
-                        ${leaderboardHTML}
+                    <div class="tab-container">
+                        <button id="tab-score" class="tab-button ${state.activeTab === 'score' ? 'active' : ''}">
+                            Your Score
+                        </button>
+                        <button id="tab-leaderboard" class="tab-button ${state.activeTab === 'leaderboard' ? 'active' : ''}">
+                            Leaderboard
+                        </button>
+                        <button id="tab-answers" class="tab-button ${state.activeTab === 'answers' ? 'active' : ''}">
+                            All Answers
+                        </button>
                     </div>
                     
-                    <div class="results-container">
-                        <h2>Question Results</h2>
-                        ${resultsHTML}
+                    <div id="tab-content-score" class="tab-content ${state.activeTab === 'score' ? 'active' : ''}">
+                        <div class="score-card">
+                            <h3>Your Score Details</h3>
+                            <p>You answered ${Object.keys(state.answers).length} questions.</p>
+                            <p>You got ${scoreData.correctCount} correct answers.</p>
+                            <p>Your score is ${scoreData.score}%</p>
+                        </div>
                     </div>
                     
-                    <div style="text-align: center; margin-top: 20px;">
-                        <button id="exit-admin-btn" class="exit-button">Exit Admin Mode</button>
+                    <div id="tab-content-leaderboard" class="tab-content ${state.activeTab === 'leaderboard' ? 'active' : ''}">
+                        <h3>Leaderboard</h3>
+                        <div class="participants-container">
+                            ${leaderboardHTML}
+                        </div>
                     </div>
+                    
+                    <div id="tab-content-answers" class="tab-content ${state.activeTab === 'answers' ? 'active' : ''}">
+                        <h3>All Participants' Answers</h3>
+                        <div class="results-container">
+                            ${resultsHTML}
+                        </div>
+                    </div>
+                    
+                    <button id="reset-btn" class="submit-button" style="margin-top: 30px;">Start Again (New User)</button>
                 </div>
             `;
 
             // Add event listeners
-            document.getElementById('exit-admin-btn').addEventListener('click', () => {
-                state.isAdmin = false;
-                state.adminPassword = '';
+            document.getElementById('reset-btn').addEventListener('click', () => {
+                state.username = '';
+                state.answers = {};
+                state.submitted = false;
+                state.quizStarted = false;
+                state.userScore = 0;
+                state.scoreRevealed = false;
+                state.activeTab = 'score';
+                
+                localStorage.removeItem('triviaUsername');
+                localStorage.removeItem('triviaAnswers');
+                localStorage.setItem('triviaSubmitted', 'false');
+                localStorage.removeItem('triviaUserScore');
+                localStorage.setItem('triviaScoreRevealed', 'false');
+                
                 render();
             });
             
             document.getElementById('refresh-btn').addEventListener('click', () => {
                 fetchFromGoogleSheets();
             });
+            
+            // Tab navigation
+            document.getElementById('tab-score').addEventListener('click', () => {
+                state.activeTab = 'score';
+                render();
+            });
+            
+            document.getElementById('tab-leaderboard').addEventListener('click', () => {
+                state.activeTab = 'leaderboard';
+                render();
+            });
+            
+            document.getElementById('tab-answers').addEventListener('click', () => {
+                state.activeTab = 'answers';
+                render();
+            });
+        }
+
+        function renderLoadingScreen() {
+            const appDiv = document.getElementById('app-container');
+            appDiv.innerHTML = `
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Loading...</p>
+                </div>
+            `;
         }
 
         // Main render function
@@ -1010,12 +1016,10 @@
                 return;
             }
             
-            if (state.isAdmin) {
-                renderAdminScreen();
-            } else if (!state.quizStarted) {
+            if (!state.quizStarted) {
                 renderWelcomeScreen();
             } else if (state.submitted) {
-                renderSubmittedScreen();
+                renderResultsScreen();
             } else {
                 renderQuizScreen();
             }
