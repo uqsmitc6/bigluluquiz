@@ -495,14 +495,14 @@
             "Tie breaker: what's the area of a squash court?"
         ];
 
-        // Correct answers for automatic scoring
+        // Correct answers for automatic scoring - updated with more variations
         const correctAnswers = [
             "cryptic", // What's the type of crossword where each clue is a word puzzle?
             "lskd", // What Australian brands name is an abbreviation for "Loose kid"?
             "hiroshima and nagasaki", // What are the two cities targeted by the atomic bombs?
             "eczema", // Beginning with E what is the name for atopic dermatitis?
             "geri halliwell and victoria beckham", // Name the two spice girls who left the group at separate times?
-            "a is melbourne cup horse, b, c & d are drag race queens", // Are these names of Melbourne cup horses or drag race Queens?
+            "a is melbourne cup horse, b c d are drag race queens", // Are these names of Melbourne cup horses or drag race Queens?
             "ceviche", // Beginning with C what's the dish which consists of fish or shellfish and is marinated in citrus?
             "dumbbell, kettlebell, barbell", // 3 pieces of gym equipment all ending in "bell"
             "kelpie", // What breed was the dog Valerie who had escaped her owners for 529 days on Kangaroo Island?
@@ -513,9 +513,9 @@
             "australian securities and investments commission", // On Australia what does ASIC stand for?
             "campaign", // Beginning with C what is the name for the ongoing adventures in Dungeons and Dragons?
             "thinking outside the box", // What shape themed idiom was voted most hated office placed jargon?
-            "winnie bluetooth", // In Australian slang what device is known as a "Winnie Bluetooth"?
-            "back to the future and star trek iv", // What two film franchises released in the 80s involves time travel
-            "24%", // What is 6/25 as a percentage?
+            "vape", // In Australian slang what device is known as a "Winnie Bluetooth"?
+            "back to the future and terminator", // Corrected: What two film franchises released in the 80s involves time travel
+            "24", // What is 6/25 as a percentage?
             "", // Come back to this
             "rolex", // What watch brand has a crown as the logo?
             "benito mussolini", // Fascist dictator of Italy from 1922-1943?
@@ -523,7 +523,7 @@
             "samaritan", // What terms is derived from an ancient Middle East region which refers to someone who helps strangers?
             "abxy", // What four letters represent the button controls on a switch controller?
             "netball", // Which is the bigger court size- tennis doubles or netball?
-            "e=mc²", // Discovered in 1905 what is the most famous mathematics equation?
+            "e=mc2", // Discovered in 1905 what is the most famous mathematics equation?
             "find, close, underline, center", // In Microsoft word what do these commands do
             "queensland and western australia", // What two Australian states do not have daylight savings?
             "signet", // What word refers to a seal used officially to give personal authority to a document in lieu of signature?
@@ -541,7 +541,7 @@
             "62.4 square meters" // Tie breaker: what's the area of a squash court?
         ];
 
-        // Helper function to calculate score
+        // Helper function to calculate score - using the improved isAnswerCorrect function
         function calculateScore(userAnswers) {
             let score = 0;
             let correctCount = 0;
@@ -556,12 +556,13 @@
                     return;
                 }
                 
-                const userAnswer = userAnswers[questionIndex].toLowerCase().trim();
-                const correctAnswer = correctAnswers[questionIndex].toLowerCase();
+                const userAnswer = userAnswers[questionIndex];
+                if (!userAnswer || userAnswer.trim() === '') {
+                    return; // Skip empty answers
+                }
                 
-                // Check if the user's answer includes the correct answer
-                // This is a simple check - more sophisticated matching could be implemented
-                if (userAnswer.includes(correctAnswer) || correctAnswer.includes(userAnswer)) {
+                // Use the improved answer checking function
+                if (isAnswerCorrect(userAnswer, correctAnswers[questionIndex])) {
                     correctCount++;
                 }
             });
@@ -576,21 +577,78 @@
             };
         }
 
-        // Function to check if an answer is correct
+        // Improved function to check if an answer is correct
         function isAnswerCorrect(userAnswer, correctAnswer) {
             if (!userAnswer || !correctAnswer) return false;
             
             userAnswer = userAnswer.toLowerCase().trim();
             correctAnswer = correctAnswer.toLowerCase().trim();
             
-            // More strict matching - single letters or very short answers won't match
-            // unless they're exact matches
+            // Handle very short answers (2 chars or less) with exact matching
             if (userAnswer.length <= 2) {
                 return userAnswer === correctAnswer;
             }
             
-            // For longer answers, check if user answer contains the correct one or vice versa
-            // but with a minimum threshold of characters
+            // Special case fixes for known problematic questions
+            // Q18: Correct the "Star Trek IV" vs "Terminator" issue
+            if (correctAnswer.includes("back to the future") && userAnswer.includes("terminator")) {
+                return true;
+            }
+            
+            // For multiple answer questions, check if the user got at least half right
+            if (correctAnswer.includes(",") && userAnswer.includes(",")) {
+                const correctParts = correctAnswer.split(",").map(part => part.trim());
+                const userParts = userAnswer.split(",").map(part => part.trim());
+                
+                // Count how many parts the user got right
+                let correctCount = 0;
+                for (const userPart of userParts) {
+                    for (const correctPart of correctParts) {
+                        if (userPart.includes(correctPart) || correctPart.includes(userPart)) {
+                            correctCount++;
+                            break;
+                        }
+                    }
+                }
+                
+                // If user got at least half of the correct parts, consider it correct
+                return correctCount >= Math.ceil(correctParts.length / 2);
+            }
+            
+            // For single answers, be more lenient with matching
+            // Check for key words in multi-word answers
+            const userWords = userAnswer.split(/\s+/);
+            const correctWords = correctAnswer.split(/\s+/);
+            
+            // If both answers are single words, check for inclusion
+            if (userWords.length === 1 && correctWords.length === 1) {
+                return userWords[0].includes(correctWords[0]) || correctWords[0].includes(userWords[0]);
+            }
+            
+            // For longer answers, check if at least half of the key words match
+            let matchCount = 0;
+            for (const userWord of userWords) {
+                if (userWord.length <= 3) continue; // Skip short words
+                
+                for (const correctWord of correctWords) {
+                    if (correctWord.length <= 3) continue; // Skip short words
+                    
+                    if (userWord.includes(correctWord) || correctWord.includes(userWord)) {
+                        matchCount++;
+                        break;
+                    }
+                }
+            }
+            
+            // If more than half of the significant words match, consider it correct
+            const significantUserWords = userWords.filter(w => w.length > 3).length;
+            const significantCorrectWords = correctWords.filter(w => w.length > 3).length;
+            
+            if (significantUserWords > 0 && significantCorrectWords > 0) {
+                return matchCount >= Math.min(significantUserWords, significantCorrectWords) / 2;
+            }
+            
+            // Fallback to checking if one answer contains the other
             return userAnswer.includes(correctAnswer) || correctAnswer.includes(userAnswer);
         }
 
